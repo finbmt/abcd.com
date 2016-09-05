@@ -62,13 +62,23 @@ Route::get('reset', function () {
     return redirect('password/email');
 });
 
+Route::get('welcome', [
+    'as' 		=> 'welcome',
+    'uses' 		=> 'WelcomeController@index'
+]);
+
+Route::get('list', [
+    'as' 		=> 'list',
+    'uses' 		=> 'WelcomeController@index'
+]);
+
 // USER PAGE ROUTES - RUNNING THROUGH AUTH MIDDLEWARE
 Route::group(['middleware' => 'auth'], function () {
 
 	// HOMEPAGE ROUTE
 	Route::get('/', [
-	    'as' 		=> 'user',
-	    'uses' 		=> 'UserController@index'
+	    'as' 		=> 'scores',
+	    'uses' 		=> 'FootballController@index'
 	]);
 
 	// INCEPTIONED MIDDLEWARE TO CHECK TO ALLOW ACCESS TO CURRENT USER ONLY
