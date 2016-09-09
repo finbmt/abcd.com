@@ -5,7 +5,7 @@
 @endsection
 
 @section('template_linked_css')
-	{!! HTML::style(asset('https://cdn.datatables.net/1.10.12/css/dataTables.material.min.css'), array('type' => 'text/css', 'rel' => 'stylesheet')) !!}
+
 @endsection
 
 @section('template_fastload_css')
@@ -40,10 +40,10 @@
 <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col mdl-cell--8-col-tablet mdl-cell--12-col-desktop margin-top-0">
 	<div class="mdl-card__title mdl-color--primary mdl-color-text--white">
 		<h2 class="mdl-card__title-text logo-style">
-			@if ($total_users === 1)
-			    {{ $total_users }} Trận đấu
-			@elseif ($total_users > 1)
-			    {{ $total_users }} Trận đấu
+			@if ($total_scores === 1)
+			    {{ $total_scores }} Trận đấu
+			@elseif ($total_scores > 1)
+			    {{ $total_scores }} Trận đấu
 			@else
 			    Không có dữ liệu :(
 			@endif
@@ -54,7 +54,6 @@
 			<table id="user_table" class="mdl-data-table mdl-js-data-table data-table" cellspacing="0" width="100%">
 			  <thead>
 			    <tr>
-					<th class="mdl-data-table__cell--non-numeric">Giải Đấu</th>
 					<th class="mdl-data-table__cell--non-numeric">Thời<br>Gian</th>
 					<th class="mdl-data-table__cell--non-numeric">Tình<br>Trạng</th>
 					<th class="mdl-data-table__cell--non-numeric">Đội Nhà</th>
@@ -66,44 +65,26 @@
 			    </tr>
 			  </thead>
 			  <tbody>
-			        @foreach ($users as $a_user)
+			        @foreach ($scores as $item)
 						<tr>
-							<td class="mdl-data-table__cell--non-numeric"></td>
-							<td class="mdl-data-table__cell--non-numeric"></td>
-							<td class="mdl-data-table__cell--non-numeric"></td>
-							<td class="mdl-data-table__cell--non-numeric"></td>
-							<td class="mdl-data-table__cell--non-numeric"></td>
-							<td class="mdl-data-table__cell--non-numeric"></td>
+							<td colspan="8" class="mdl-data-table__cell--non-numeric" style="color:#fff;background-color:{{ $item['League']['color'] }}">
+								 <span class="mdl-list__item"><i class="material-icons">&#xE315;</i> <b>{{ $item['League']['fullName'] }}</b></span>
+							</td>
+						</tr>
+						@foreach ($item['Match'] as $league)
+						<tr>
+							<td class="mdl-data-table__cell--non-numeric">{{ $league['MatchTime'] }}</td>
+							<td class="mdl-data-table__cell--non-numeric">{!! $league['mState'] !!}</td>
+							<td class="mdl-data-table__cell--non-numeric">{{ $league['hName'] }}</td>
+							<td class="mdl-data-table__cell--non-numeric">{{ $league['hScore'] }} - {{ $league['gScore'] }}</td>
+							<td class="mdl-data-table__cell--non-numeric">{{ $league['gName'] }}</td>
 							<td class="mdl-data-table__cell--non-numeric"></td>
 							<td class="mdl-data-table__cell--non-numeric"></td>
 							<td class="mdl-data-table__cell--non-numeric">
 
-
-								{{-- VIEW USER PROFILE ICON BUTTON --}}
-								<a href="/profile/{{$a_user->name}}" class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" title="View User Profile">
-									<i class="material-icons">person_outline</i>
-								</a>
-
-
-								{{-- VIEW USER ACCOUNT ICON BUTTON --}}
-								<a href="{{ URL::to('users/' . $a_user->id) }}" class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" title="View User Account">
-									<i class="material-icons">account_circle</i>
-								</a>
-
-								{{-- EDIT USER ICON BUTTON --}}
-								<a href="{{ URL::to('users/' . $a_user->id . '/edit') }}" class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect">
-									<i class="material-icons">edit</i>
-								</a>
-
-								{{-- DELETE ICON BUTTON AND FORM CALL --}}
-								{!! Form::open(array('url' => 'users/' . $a_user->id, 'class' => 'inline-block', 'id' => 'delete_'.$a_user->id)) !!}
-									{!! Form::hidden('_method', 'DELETE') !!}
-									<a href="#" class="dialog-button dialiog-trigger-delete dialiog-trigger{{$a_user->id}} mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" data-userid="{{$a_user->id}}">
-										<i class="material-icons">delete_forever</i>
-									</a>
-								{!! Form::close() !!}
 							</td>
 						</tr>
+						@endforeach
 			        @endforeach
 			  </tbody>
 			</table>
@@ -133,20 +114,5 @@
 
 @section('template_scripts')
 
-	@include('scripts.mdl-datatables')
-
-	<script type="text/javascript">
-		@foreach ($users as $a_user)
-			mdl_dialog('.dialiog-trigger{{$a_user->id}}','','#dialog_delete');
-		@endforeach
-		var userid;
-		$('.dialiog-trigger-delete').click(function(event) {
-			event.preventDefault();
-			userid = $(this).attr('data-userid');
-		});
-		$('#confirm').click(function(event) {
-			$('form#delete_'+userid).submit();
-		});
-	</script>
 
 @endsection

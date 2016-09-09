@@ -7,6 +7,8 @@
 		<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes" name="viewport">
 		<title>@if (trim($__env->yieldContent('template_title')))@yield('template_title') | @endif {{ Lang::get('titles.app') }}</title>
 		<base href="{{url('/')}}" />
+
+		@yield('template_scripts_header')
 	    {{-- HTML5 Shim and Respond.js for IE8 support --}}
 	    <!--[if lt IE 9]>
 			{!! HTML::script('https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js', array('type' => 'text/javascript')) !!}

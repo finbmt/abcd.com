@@ -67,10 +67,23 @@ Route::get('welcome', [
     'uses' 		=> 'WelcomeController@index'
 ]);
 
-Route::get('list', [
-    'as' 		=> 'list',
-    'uses' 		=> 'WelcomeController@index'
-]);
+/*Route::get('apilist', [
+    'as' 		=> 'apilist',
+    'uses' 		=> 'FootballController@getlist'
+]);*/
+Route::get('apilist', function (){
+    return ['some' => 'abc'];
+});
+
+Route::group(['prefix' => 'web'], function(){
+    Route::get('index', 'FootballController@index');
+});
+/* API */
+Route::group(['prefix' => 'api/v1'], function(){
+    Route::get('list', 'FootballController@getlist');
+    Route::get('demo', 'FootballController@demo');
+});
+
 
 // USER PAGE ROUTES - RUNNING THROUGH AUTH MIDDLEWARE
 Route::group(['middleware' => 'auth'], function () {
