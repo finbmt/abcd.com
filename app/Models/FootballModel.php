@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Faker\Provider\cs_CZ\DateTime;
 use Illuminate\Database\Eloquent\Model;
 
 class FootballModel extends Model
@@ -90,15 +91,25 @@ class FootballModel extends Model
         return array($arr, $infoArr[1]);
     }
 
-    public function mMatch($infoStr) {
+    public function mMatch($infoStr, $mId = null) {
         $infoArr = explode($this->splitColumn, $infoStr);
-        //dd($infoArr);
+        $isDetail = false;
+        //dd($mId);
+        if (isset($mId))
+        {
+            if ($mId == $infoArr[0]){
+                $isDetail = true;
+            } else {
+                return;
+            }
+        }
+
         $arr['id'] = $infoArr[0];//mId
         $arr['league_id'] = $infoArr[1];//lId
         //$arr['State'] = $infoArr[2];
         $arr['date'] = $this->toDateString($infoArr[3]);
         $arr['start'] = $this->toTimeString($infoArr[3]);
-        $arr['status'] = $this->getMatchState($infoArr[2]);
+        $arr['status'] = $this->getMatchState($infoArr[2], $infoArr[3]);
         //$arr['mTime'] = $infoArr[3];
         //$arr['mTime2'] = $infoArr[4];
 
@@ -107,6 +118,7 @@ class FootballModel extends Model
             $arr['MatchTime'] = $this->toLocalTime($infoArr[4]);
         else
             $arr['MatchTime'] = $this->toLocalTime($infoArr[3]);*/
+
         //$arr['DisplayDate'] = $this->toDateString($infoArr[3]);
         //$arr['DisplayTime'] = $this->toTimeString($infoArr[3]);
 
@@ -118,12 +130,24 @@ class FootballModel extends Model
         $arr['gName'] = $gName;
         $arr['hScore'] = $infoArr[7];
         $arr['gScore'] = $infoArr[8];
-        $arr['hHalfScore'] = $infoArr[9];
-        $arr['gHalfScore'] = $infoArr[10];
-        $arr['hRed'] = $infoArr[11];
-        $arr['gRed'] = $infoArr[12];
-        $arr['hYellow'] = $infoArr[13];
-        $arr['gYellow'] = $infoArr[14];
+
+        if ($isDetail) {
+            $arr['hHalfScore'] = $infoArr[9];
+            $arr['gHalfScore'] = $infoArr[10];
+            $arr['hRed'] = $infoArr[11];
+            $arr['gRed'] = $infoArr[12];
+            $arr['hYellow'] = $infoArr[13];
+            $arr['gYellow'] = $infoArr[14];
+
+            $mBet365 = $this->mBet365($mId);
+
+            if ($mBet365) {
+                $arr['Up'] = $mBet365['Up'];
+                $arr['Goal'] = $mBet365['Goal'];
+                $arr['Down'] = $mBet365['Down'];
+            }
+        }
+
         //$arr['caiPiaoHao'] = $infoArr[16];
         //$arr['isZhenRong'] = ($infoArr[18] == "1");
         $arr['hOrder'] = $infoArr[22] != "" ? "[" + $infoArr[22] + "]" : "";
@@ -132,16 +156,11 @@ class FootballModel extends Model
         //$arr['isTop'] = false;
         //$arr['mIndex'] = 0;
         //$arr['mState'] = $this->getMatchState($arr['State']);
-        $mBet365 = $this->mBet365($arr['mId']);
-        if ($mBet365) {
-            $arr['Up'] = $mBet365['Up'];
-            $arr['Goal'] = $mBet365['Goal'];
-            $arr['Down'] = $mBet365['Down'];
-        }
+
         return $arr;
     }
 
-    public function getMatchState($mState, $) {
+    public function getMatchState($mState, $startTime = '') {
         $ms = "";
         switch ($mState) {
             case 4:
@@ -177,7 +196,40 @@ class FootballModel extends Model
             case -14:
                 $ms = "Postp.";
                 break; //推迟 hoãn
+        }
 
+        if ($mState == 1) {
+            date_default_timezone_set("Asia/Bangkok");
+            $now = new \DateTime();
+            $serverTime = $now->getTimestamp()/ 1000;
+            $startTime = \DateTime::createFromFormat('YmdHis', $startTime)->getTimestamp()/ 1000;
+
+            $df = ($serverTime - $startTime) / 60;
+            $df = intval($df);
+            if ($df <= 0) {
+                $ms = "1'";
+            } else if ($df <= 45) {
+                $ms = $df + "'";
+            } else {
+                $ms = "45+'";
+            }
+        } else if ($mState == 3) {
+            date_default_timezone_set("Asia/Bangkok");
+            $now = new \DateTime();
+            $serverTime = $now->getTimestamp()/ 1000;
+            $startTime = \DateTime::createFromFormat('YmdHis', $startTime)->getTimestamp()/ 1000;
+
+            $df = ($serverTime - $startTime) / 60 + 46;
+            //由于不确定它计算出来的数据一定准确，所以做多几个判断
+            $df = intval($df);
+
+            if ($df <= 46) {
+                $ms = "46'";
+            } else if ($df <= 90) {
+                $ms = $df + "'";
+            } else {
+                $ms = "90+'";
+            }
         }
 
         return $ms;

@@ -23,8 +23,8 @@ class FootballController extends Controller {
 
     public function demo ()
     {
-        $dom = HtmlDomParser::file_get_html('http://www.bongdalu.com/giai-ngoai-hang-anh-fixtures/');
-        foreach($dom->find('table.table_live') as $element)
+        $dom = HtmlDomParser::file_get_html('http://m.bongdalu.com/EventDetail.htm?scheid=1311924');
+        foreach($dom->find('.content') as $element)
             $result = $element->plaintext;
         dd($dom);
     }
@@ -37,9 +37,10 @@ class FootballController extends Controller {
 	{
         $fbModel = new FootballModel();
         $_matchData = array();
-        $url = "http://m.bongdalu.com/Ajaxs/ScheduleAjax.aspx?date=2016-09-06";
+        $url = 'http://abcd.com/public/Schedule_6_0_201609100105.txt';
+        ///$url = "http://m.bongdalu.com/Ajaxs/ScheduleAjax.aspx?date=2016-09-09";
         $data_txt = file_get_contents($url);
-        $domains = explode($fbModel->splitScheduleDomain, $data_txt);
+        $domains = explode($fbModel->splitDomain, $data_txt);
         $leagueDomain = explode($fbModel->splitRecord, $domains[0]);
 
         $_leagueData['LeagueNum'] = count($leagueDomain);
@@ -50,17 +51,17 @@ class FootballController extends Controller {
 
         $matchDomain = explode($fbModel->splitRecord, $domains[1]);
         $_matchData['MatchCount'] = count($matchDomain);
-
+        //dd($matchDomain);
         foreach ($matchDomain as $key => $item){
             $matchItem = $fbModel->mMatch($item);
             //$matchItem['mIndex'] = $key;
-            $_matchData['MatchList'][$matchItem['mId']] = $matchItem;
+            $_matchData['MatchList'][$matchItem['id']] = $matchItem;
         }
 
         $tmp = array();
         foreach ($_matchData['MatchList'] as $key => $item)
         {
-            $tmp[$item['lId']][] = $item;
+            $tmp[$item['league_id']][] = $item;
         }
 
         $output = array();
@@ -78,4 +79,44 @@ class FootballController extends Controller {
             'message' => $output
         ], 200);
 	}
+
+    public function getdetail($mId)
+    {
+        $fbModel = new FootballModel();
+        $_matchData = array();
+        $url = 'http://abcd.com/public/Schedule_6_0_201609100105.txt';
+        ///$url = "http://m.bongdalu.com/Ajaxs/ScheduleAjax.aspx?date=2016-09-09";
+        $data_txt = file_get_contents($url);
+        $domains = explode($fbModel->splitDomain, $data_txt);
+        $leagueDomain = explode($fbModel->splitRecord, $domains[0]);
+
+        $matchDomain = explode($fbModel->splitRecord, $domains[1]);
+        $_matchData['MatchCount'] = count($matchDomain);
+
+        $matchItem = array();
+        foreach ($matchDomain as $key => $item) {
+            $info = explode($fbModel->splitColumn, $item);
+            if ($mId == $info[0]){
+                $matchItem = $fbModel->mMatch($item, $mId);
+                break;
+            } else {
+                continue;
+            }
+        }
+        $output['Match'] = $matchItem;
+
+        $url_ajax = 'http://m.bongdalu.com/Ajax.aspx?type=1&id='.$mId.'&flesh=0.029398993489332836';
+        $json_content = file_get_contents($url_ajax);
+        if ($json_content) {
+            $data = json_decode($json_content, TRUE);
+            $output['TechStatistic'] = $data['TechStatistic'];
+            $output['DetailList'] = $data['DetailList'];
+            //dd($data);
+            //array_merge($output, $data);
+        }
+
+        return \Illuminate\Support\Facades\Response::json([
+            'message' => $output
+        ], 200);
+    }
 }
