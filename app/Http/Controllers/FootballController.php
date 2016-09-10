@@ -43,10 +43,25 @@ class FootballController extends Controller {
         $domains = explode($fbModel->splitDomain, $data_txt);
         $leagueDomain = explode($fbModel->splitRecord, $domains[0]);
 
+        // get list leagues
         $_leagueData['LeagueNum'] = count($leagueDomain);
         foreach ($leagueDomain as $item) {
             $leagueItem = $fbModel->mLeague($item);
             $_leagueData['LeagueList'][$leagueItem[1]] = $leagueItem[0];
+        }
+
+        // get list Odds
+        $url_odds = 'http://m.bongdalu.com/txt/goalBf31.xml';
+        $data_xml = simplexml_load_file($url_odds);
+        $_oddsData = array();
+        foreach ($data_xml->match->m as $value)
+        {
+            $itemOdds = explode(',', $value);
+            $item = array();
+            $item['odds'] = $itemOdds[2];
+            $item['hMoney'] = $itemOdds[3];
+            $item['gMoney'] = $itemOdds[4];
+            $_oddsData[$itemOdds[0]] = $item;
         }
 
         $matchDomain = explode($fbModel->splitRecord, $domains[1]);
@@ -54,7 +69,10 @@ class FootballController extends Controller {
         //dd($matchDomain);
         foreach ($matchDomain as $key => $item){
             $matchItem = $fbModel->mMatch($item);
-            //$matchItem['mIndex'] = $key;
+            if (array_key_exists($matchItem['id'], $_oddsData)) {
+                $matchItem = array_merge($matchItem, $_oddsData[$matchItem['id']]);
+            }
+
             $_matchData['MatchList'][$matchItem['id']] = $matchItem;
         }
 
@@ -72,8 +90,6 @@ class FootballController extends Controller {
                 'Match' => $item
             );
         }
-        /*$de = $fbModel->mBet365('1224307');
-        dd($de);*/
 
         return \Illuminate\Support\Facades\Response::json([
             'message' => $output
