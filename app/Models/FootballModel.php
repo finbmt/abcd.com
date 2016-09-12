@@ -33,14 +33,14 @@ class FootballModel extends Model
 
         $_matchData['LeagueNum'] = count($leagueDomain);
         foreach ($leagueDomain as $item) {
-            $leagueItem = $this->mLeague($item);
+            $leagueItem = $this->mLeague($item, 1);
             $_matchData['LeagueList'][$leagueItem['lId']] = $leagueItem;
         }
 
         $matchDomain = explode($this->splitRecord, $domains[1]);
         $_matchData['MatchCount'] = count($matchDomain);
         foreach ($matchDomain as $key => $item){
-            $matchItem = $this->mMatch($item);
+            $matchItem = $this->mMatch($item, 0);
             //$matchItem['mIndex'] = $key;
             $matchItem['lLeague'] = $_matchData['LeagueList'][$matchItem['lId']];
             $_matchData['MatchList'][$matchItem['mId']] = $matchItem;
@@ -91,10 +91,16 @@ class FootballModel extends Model
         return array($arr, $infoArr[1]);
     }
 
-    public function mMatch($infoStr, $mId = null) {
+    /**
+     * @param $infoStr
+     * @param $type 0 tỷ số / 1 schedule / 2 detail
+     * @param null $mId
+     * @return mixed
+     */
+    public function mMatch($infoStr, $type, $mId = null) {
         $infoArr = explode($this->splitColumn, $infoStr);
         $isDetail = false;
-        //dd($mId);
+        //dd($infoArr);
         if (isset($mId))
         {
             if ($mId == $infoArr[0]){
@@ -150,12 +156,24 @@ class FootballModel extends Model
 
         //$arr['caiPiaoHao'] = $infoArr[16];
         //$arr['isZhenRong'] = ($infoArr[18] == "1");
-        $arr['hOrder'] = $infoArr[22] != "" ? "[" + $infoArr[22] + "]" : "";
-        $arr['gOrder'] = $infoArr[23] != "" ? "[" + $infoArr[23] + "]" : "";
+        if($type == 0)
+        {
+            $arr['hOrder'] = $infoArr[22] != "" ? "[" + $infoArr[22] + "]" : "";
+            $arr['gOrder'] = $infoArr[23] != "" ? "[" + $infoArr[23] + "]" : "";
+        }
+
         //$arr['explain'] = $infoArr[24];
         //$arr['isTop'] = false;
         //$arr['mIndex'] = 0;
         //$arr['mState'] = $this->getMatchState($arr['State']);
+        if ($type == 1)
+        {
+            $arr['hOrder'] = $infoArr[19] != "" ? "[" + $infoArr[19] + "]" : "";
+            $arr['gOrder'] = $infoArr[20] != "" ? "[" + $infoArr[20] + "]" : "";
+            $arr['odds'] = $this->goal2GoalT($infoArr[17]);
+            $arr['hMoney'] = $infoArr[16];
+            $arr['gMoney'] = $infoArr[18];
+        }
 
         return $arr;
     }
@@ -235,16 +253,29 @@ class FootballModel extends Model
         return $ms;
     }
 
-    public function toLocalTime($time)
+    public function toLocalTime($str)
     {
-        $date = \DateTime::createFromFormat('YmdHis', $time);
-        return $sDate = $date->format('d/m/Y H:i');
+        //2016 09 11 11 00 00
+        $time = substr($str, -6);
+        $hours = substr($time, 0, 2);
+        $min = substr($time, 2, 2);
+        $time_str = $hours . ":" . $min;
+
+        $date = substr($str, 8);
+        $year = substr($date, 4);
+        $month = substr($date, 4, 2);
+        $day = substr($date, 6, 2);
+
+        return $day . '/' . $month . '/' . $year . ' ' . $time_str;
     }
 
     public function toTimeString($time)
     {
-        $date = \DateTime::createFromFormat('YmdHis', $time);
-        return $date->format('H:i');
+        //2016 09 11 11 00 00
+        $time = substr($time, -6);
+        $hours = substr($time, 0, 2);
+        $min = substr($time, 2, 2);
+        return $hours . ":" . $min;
     }
 
     public function toDateString($time)

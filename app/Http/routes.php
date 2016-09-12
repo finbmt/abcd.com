@@ -80,7 +80,8 @@ Route::group(['prefix' => 'web'], function(){
 });
 /* API */
 Route::group(['prefix' => 'api/v1'], function(){
-    Route::get('list', 'FootballController@getlist');
+    Route::get('list', 'FootballController@getList');
+    Route::get('schedule/{date?}', 'FootballController@getSchedule');
     Route::get('detail/{mId}', 'FootballController@getdetail');
     Route::get('demo', 'FootballController@demo');
 });
