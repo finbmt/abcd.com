@@ -14,6 +14,7 @@ class FootballModel extends Model
     public $arrColor = ["#006666", "#518ed2", "#e8811a", "#949720", "#8f6dd6", "#53ac98", "#ff9966",
         "#457d1b", "#8d8abd", "#996733", "#8c8a64", "#999012", "#ff6633", "#ca00ca", "#1ba570", "#990099"];
     //
+    public $URL_ODDS_DETALL = 'http://m.bongdalu.com/Ajax.aspx?type=3&id=';
 
     /**
      * @return array
@@ -50,10 +51,11 @@ class FootballModel extends Model
         return $_matchData;
     }
 
+
     public function mBet365($mId) {
         if (!$mId) return;
 
-        $url = 'http://m.bongdalu.com/Ajax.aspx?type=3&id=' . $mId;
+        $url = $this->URL_ODDS_DETALL . $mId;
 
         $json_string = @file_get_contents($url);
         if($json_string === FALSE) {
@@ -138,28 +140,26 @@ class FootballModel extends Model
         $arr['gScore'] = $infoArr[8];
 
         if ($isDetail) {
+            $mBet365 = $this->mBet365($mId);
+            if ($mBet365) {
+                $arr['odds'] = $mBet365['Goal'];
+                $arr['hMoney'] = $mBet365['Up'];
+                $arr['gMoney'] = $mBet365['Down'];
+            }
             $arr['hHalfScore'] = $infoArr[9];
             $arr['gHalfScore'] = $infoArr[10];
             $arr['hRed'] = $infoArr[11];
             $arr['gRed'] = $infoArr[12];
             $arr['hYellow'] = $infoArr[13];
             $arr['gYellow'] = $infoArr[14];
-
-            $mBet365 = $this->mBet365($mId);
-
-            if ($mBet365) {
-                $arr['Up'] = $mBet365['Up'];
-                $arr['Goal'] = $mBet365['Goal'];
-                $arr['Down'] = $mBet365['Down'];
-            }
         }
 
         //$arr['caiPiaoHao'] = $infoArr[16];
         //$arr['isZhenRong'] = ($infoArr[18] == "1");
         if($type == 0)
         {
-            $arr['hOrder'] = $infoArr[22] != "" ? "[" + $infoArr[22] + "]" : "";
-            $arr['gOrder'] = $infoArr[23] != "" ? "[" + $infoArr[23] + "]" : "";
+            $arr['hOrder'] = $infoArr[22] != "" ? "[" . $infoArr[22] . "]" : "";
+            $arr['gOrder'] = $infoArr[23] != "" ? "[" . $infoArr[23] . "]" : "";
         }
 
         //$arr['explain'] = $infoArr[24];
@@ -168,8 +168,8 @@ class FootballModel extends Model
         //$arr['mState'] = $this->getMatchState($arr['State']);
         if ($type == 1)
         {
-            $arr['hOrder'] = $infoArr[19] != "" ? "[" + $infoArr[19] + "]" : "";
-            $arr['gOrder'] = $infoArr[20] != "" ? "[" + $infoArr[20] + "]" : "";
+            $arr['hOrder'] = $infoArr[19] != "" ? "[" . $infoArr[19] . "]" : "";
+            $arr['gOrder'] = $infoArr[20] != "" ? "[" . $infoArr[20] . "]" : "";
             $arr['odds'] = $this->goal2GoalT($infoArr[17]);
             $arr['hMoney'] = $infoArr[16];
             $arr['gMoney'] = $infoArr[18];
@@ -179,6 +179,50 @@ class FootballModel extends Model
     }
 
     public function getMatchState($mState, $startTime = '') {
+        $ms = "";
+        $ms = $this->getMatchStateString($mState);
+
+        if ($mState == 1) {
+            date_default_timezone_set("Asia/Bangkok");
+            $now = new \DateTime();
+            $start = \DateTime::createFromFormat('YmdHis', $startTime);
+            $interval = date_diff($now, $start);
+            $df = $interval->format("%i");
+            $df = intval($df);
+            if ($df <= 0) {
+                $ms = "1'";
+            } else if ($df <= 45) {
+                $ms = $df + "'";
+            } else {
+                $ms = "45+'";
+            }
+        } else if ($mState == 3) {
+            date_default_timezone_set("Asia/Bangkok");
+            $now = new \DateTime();
+            //$serverTime = $now->getTimestamp() / 1000;
+            $start = \DateTime::createFromFormat('YmdHis', $startTime);
+            $interval = date_diff($now, $start);
+            $df = $interval->format("%i");
+            //由于不确定它计算出来的数据一定准确，所以做多几个判断
+            $df = intval($df) - 15;
+
+            if ($df <= 46) {
+                $ms = "46'";
+            } else if ($df <= 90) {
+                $ms = $df + "'";
+            } else {
+                $ms = "90+'";
+            }
+        }
+
+        return $ms;
+    }
+
+    /**
+     * @param $mState
+     * @return string
+     */
+    public function getMatchStateString($mState) {
         $ms = "";
         switch ($mState) {
             case 4:
@@ -197,7 +241,7 @@ class FootballModel extends Model
                 $ms = "&nbsp"; // chưa bắt đầu
                 break;
             case -1:
-                $ms = "&nbsp";
+                $ms = "F/T";//&nbsp
                 break; //完 hoàn thành
             case -10:
                 $ms = "Cancel";
@@ -216,38 +260,34 @@ class FootballModel extends Model
                 break; //推迟 hoãn
         }
 
-        if ($mState == 1) {
-            date_default_timezone_set("Asia/Bangkok");
-            $now = new \DateTime();
-            $serverTime = $now->getTimestamp()/ 1000;
-            $startTime = \DateTime::createFromFormat('YmdHis', $startTime)->getTimestamp()/ 1000;
+        return $ms;
+    }
 
-            $df = ($serverTime - $startTime) / 60;
-            $df = intval($df);
-            if ($df <= 0) {
-                $ms = "1'";
-            } else if ($df <= 45) {
-                $ms = $df + "'";
-            } else {
-                $ms = "45+'";
-            }
-        } else if ($mState == 3) {
-            date_default_timezone_set("Asia/Bangkok");
-            $now = new \DateTime();
-            $serverTime = $now->getTimestamp()/ 1000;
-            $startTime = \DateTime::createFromFormat('YmdHis', $startTime)->getTimestamp()/ 1000;
-
-            $df = ($serverTime - $startTime) / 60 + 46;
-            //由于不确定它计算出来的数据一定准确，所以做多几个判断
-            $df = intval($df);
-
-            if ($df <= 46) {
-                $ms = "46'";
-            } else if ($df <= 90) {
-                $ms = $df + "'";
-            } else {
-                $ms = "90+'";
-            }
+    /**
+     * @param $mState
+     * 0 : not yet start, 1: not yet, end : 2: end
+     * @return string
+     */
+    public function getMatchStatus($mState) {
+        $ms = 0;
+        switch ($mState) {
+            case 4:
+            case 3:
+            case 2:
+            case 1:
+                $ms = 1;
+                break;
+            case 0:
+            case -10:
+            case -11:
+            case -12:
+            case -13:
+            case -14:
+                $ms = 0;
+                break;
+            case -1:
+                $ms = 2;
+                break;
         }
 
         return $ms;

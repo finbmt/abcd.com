@@ -82,7 +82,8 @@ Route::group(['prefix' => 'web'], function(){
 Route::group(['prefix' => 'api/v1'], function(){
     Route::get('list', 'FootballController@getList');
     Route::get('schedule/{date?}', 'FootballController@getSchedule');
-    Route::get('detail/{mId}', 'FootballController@getdetail');
+    Route::get('detail', 'FootballController@getdetail');
+    Route::get('status', 'FootballController@getstatus');
     Route::get('demo', 'FootballController@demo');
 });
 
