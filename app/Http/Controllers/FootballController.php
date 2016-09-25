@@ -255,6 +255,6 @@ class FootballController extends Controller {
         return \Illuminate\Support\Facades\Response::json([
             'message' => $message,
             'result' => $array
-        ], 200, $header, JSON_UNESCAPED_UNICODE);
+        ], $status, $header, JSON_UNESCAPED_UNICODE);
     }
 }
