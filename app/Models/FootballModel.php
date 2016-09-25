@@ -170,9 +170,9 @@ class FootballModel extends Model
         {
             $arr['hOrder'] = $infoArr[19] != "" ? "[" . $infoArr[19] . "]" : "";
             $arr['gOrder'] = $infoArr[20] != "" ? "[" . $infoArr[20] . "]" : "";
-            $arr['odds'] = $this->goal2GoalT($infoArr[17]);
-            $arr['hMoney'] = $infoArr[16];
-            $arr['gMoney'] = $infoArr[18];
+            $arr['odds'] = $infoArr[17] != "" ? $this->goal2GoalT($infoArr[17]) : "";
+            $arr['hMoney'] = $infoArr[16] != "" ? "" . $infoArr[16] . "" : "";
+            $arr['gMoney'] = $infoArr[18] != "" ? "" . $infoArr[18] . "" : "";
         }
 
         return $arr;
@@ -192,9 +192,9 @@ class FootballModel extends Model
             if ($df <= 0) {
                 $ms = "1'";
             } else if ($df <= 45) {
-                $ms = $df + "'";
+                $ms = $df . "'";
             } else {
-                $ms = "45+'";
+                $ms = "45'+";
             }
         } else if ($mState == 3) {
             date_default_timezone_set("Asia/Bangkok");
@@ -209,9 +209,9 @@ class FootballModel extends Model
             if ($df <= 46) {
                 $ms = "46'";
             } else if ($df <= 90) {
-                $ms = $df + "'";
+                $ms = $df ."'";
             } else {
-                $ms = "90+'";
+                $ms = "90'+";
             }
         }
 

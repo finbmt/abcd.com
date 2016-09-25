@@ -41,12 +41,10 @@ class FootballController extends Controller {
 	 */
 	public function getList()
 	{
-        $output = $this->_getList($this->URL_TY_SO, 0);
-
-        return \Illuminate\Support\Facades\Response::json([
-            'message' => '',
-            'result' => $output
-        ], 200);
+        //$output = $this->_getList($this->URL_TY_SO, 0);
+        $date = date("Y-m-d");
+        return $this->getSchedule($date);
+        //return $this->_printJson('', $output, 200);
 	}
 
     /**
@@ -67,19 +65,13 @@ class FootballController extends Controller {
 
         if (!preg_match("/^[0-9]{4}-[0-1][0-9]-[0-3][0-9]$/",$date))
         {
-            return \Illuminate\Support\Facades\Response::json([
-                'message' => 'Error : date wrong',
-                'result' => ''
-            ], 400);
+            return $this->_printJson('Error : date wrong', null, 400);
         }
 
         $url = $this->URL_SCHEDULE . $param;
 
         $output = $this->_getList($url, 1);
-        return \Illuminate\Support\Facades\Response::json([
-            'message' => '',
-            'result' => $output
-        ], 200);
+        return $this->_printJson('', $output, 200);
     }
 
     /**
@@ -94,10 +86,7 @@ class FootballController extends Controller {
         $date = $request->input('date');
         if (!isset($mId) || !isset($date) || !ctype_digit($mId) || !preg_match("/^[0-9]{4}-[0-1][0-9]-[0-3][0-9]$/",$date))
         {
-            return \Illuminate\Support\Facades\Response::json([
-                'message' => 'Error : id or date wrong',
-                'result' => ''
-            ], 400);
+            return $this->_printJson('Error : id or date wrong', null, 400);
         }
 
         $fbModel = new FootballModel();
@@ -128,10 +117,7 @@ class FootballController extends Controller {
             $output['DetailList'] = $data['DetailList'];
         }
 
-        return \Illuminate\Support\Facades\Response::json([
-            'message' => '',
-            'result' => $output
-        ], 200);
+        return $this->_printJson('', $output, 200);
     }
 
     /**
@@ -214,9 +200,9 @@ class FootballController extends Controller {
             foreach ($data_xml->match->m as $value) {
                 $itemOdds = explode(',', $value);
                 $item = array();
-                $item['odds'] = $fbModel->goal2GoalT($itemOdds[2]);
-                $item['hMoney'] = $itemOdds[3];
-                $item['gMoney'] = $itemOdds[4];
+                $item['odds'] =  ''. $fbModel->goal2GoalT($itemOdds[2]);
+                $item['hMoney'] = "" . $itemOdds[3] . "";
+                $item['gMoney'] = "" . $itemOdds[4] . '';
                 $_oddsData[$itemOdds[0]] = $item;
             }
         }
@@ -257,5 +243,18 @@ class FootballController extends Controller {
         }
 
         return $output;
+    }
+
+    private function _printJson($message = '', $array = '', $status = 200)
+    {
+        $header = array (
+            'Content-Type' => 'application/json; charset=UTF-8',
+            'charset' => 'utf-8'
+        );
+
+        return \Illuminate\Support\Facades\Response::json([
+            'message' => $message,
+            'result' => $array
+        ], 200, $header, JSON_UNESCAPED_UNICODE);
     }
 }
