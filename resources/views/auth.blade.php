@@ -22,7 +22,7 @@
 
 		{!! HTML::style('https://fonts.googleapis.com/css?family=Roboto:300italic,400italic,400,100,300,600,700', array('type' => 'text/css', 'rel' => 'stylesheet')) !!}
 		{!! HTML::style(asset('https://fonts.googleapis.com/icon?family=Material+Icons'), array('type' => 'text/css', 'rel' => 'stylesheet')) !!}
-
+		{!! HTML::style('https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css', array('type' => 'text/css', 'rel' => 'stylesheet')) !!}
 		@yield('template_linked_fonts')
 
 		{{-- STYLESHEETS --}}

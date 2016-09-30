@@ -159,10 +159,10 @@ return [
     	App\Providers\MacroServiceProvider::class,					// TAKE NOTE: This needs to load after HtmlServiceProvider
 
 
-
         Laravel\Socialite\SocialiteServiceProvider::class,
-
         SocialiteProviders\Manager\ServiceProvider::class,
+        Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,
+        Barryvdh\Cors\ServiceProvider::class,
 	],
 
 	/*
@@ -216,7 +216,7 @@ return [
 
         // ADD SOCIALITE
         'Socialite' 	=> Laravel\Socialite\Facades\Socialite::class,
-
+        'JWTAuth'       => Tymon\JWTAuth\Facades\JWTAuth::class,
 	],
 
 ];

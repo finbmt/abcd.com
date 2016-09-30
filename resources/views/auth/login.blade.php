@@ -45,16 +45,14 @@
                         {!! Form::button('<span class="mdl-spinner-text">'.Lang::get('auth.login').'</span><div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner mdl-color-text--white mdl-color-white"></div>', array('class' => 'mdl-button mdl-js-button mdl-js-ripple-effect center mdl-color--primary mdl-color-text--white mdl-button--raised full-span margin-bottom-1 margin-top-2','type' => 'submit','id' => 'submit')) !!}
 
                     {!! Form::close() !!}
-
+                    {!! HTML::link(route('social.redirect', ['provider' => 'facebook']), 'facekook', array('class' => 'fa fa-facebook')) !!}
+                    <a href="{{ route('social.redirect', ['provider' => 'facebook']) }}" class="btn btn-lg btn-primary btn-block">facebook</a>
                 </div>
 
                 <div class="mdl-card__actions mdl-card--border">
                     <ul class="social-list ">
                         <li>
-                            <a href="{{ route('social.redirect', ['provider' => 'twitter']) }}" class="social-twitter" id="twitter">
-                                <svg viewBox="0 0 100 100" class="shape-twitter ">
-                                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#shape-twitter"></use>
-                                </svg>
+                            <a href="{{ route('social.redirect', ['provider' => 'twitter']) }}" class="fa fa-twitter-square" id="twitter">
                                 <span>Twitter</span>
                                 <span class="mdl-tooltip mdl-tooltip--top" for="twitter">
                                     Sign-in using Twitter
@@ -100,6 +98,7 @@
                                 </span>
                             </a>
                         </li>
+
                     </ul>
                     <svg width="0" height="0" style="display: none;">
                         <defs>

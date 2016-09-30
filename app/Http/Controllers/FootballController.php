@@ -90,8 +90,9 @@ class FootballController extends Controller {
         }
 
         $fbModel = new FootballModel();
-        $_matchData = array();
-
+        $url = $this->URL_SCHEDULE . '?date=' . $date;
+        $url = $this->URL_SCHEDULE . '?date=' . $date;
+        $url = $this->URL_SCHEDULE . '?date=' . $date;
         $url = $this->URL_SCHEDULE . '?date=' . $date;
 
         $data_txt = file_get_contents($url);
@@ -219,27 +220,17 @@ class FootballController extends Controller {
                 $matchItem = $fbModel->mMatch($item, 1);
             }
 
+            if (array_key_exists($matchItem['league_id'],  $_leagueData['LeagueList']))
+            {
+                $matchItem = array_merge($matchItem, $_leagueData['LeagueList'][$matchItem['league_id']]);
+            }
+
             if ($type == 0 && array_key_exists($matchItem['id'], $_oddsData))
             {
                 $matchItem = array_merge($matchItem, $_oddsData[$matchItem['id']]);
             }
 
-            $_matchData['MatchList'][$matchItem['id']] = $matchItem;
-        }
-
-        $tmp = array();
-        foreach ($_matchData['MatchList'] as $key => $item)
-        {
-            $tmp[$item['league_id']][] = $item;
-        }
-
-        $output = array();
-        foreach($tmp as $key => $item)
-        {
-            $output[] = array(
-                'League' => $_leagueData['LeagueList'][$key],
-                'Match' => $item
-            );
+            $output[] = $matchItem;
         }
 
         return $output;

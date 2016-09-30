@@ -83,10 +83,10 @@ class FootballModel extends Model
     public function mLeague($info) {
         $infoArr = explode($this->splitColumn, $info);
         $arr['lId'] = $infoArr[1];
-        $arr['name'] = $infoArr[0];
+        $arr['lName'] = $infoArr[0];
         //$arr['type'] = $infoArr[2];
-        $arr['fullName'] = $infoArr[3];
-        $arr['color'] = $this->arrColor[$infoArr[1] % 16];
+        $arr['lFullName'] = $infoArr[3];
+        $arr['lColor'] = $this->arrColor[$infoArr[1] % 16];
         //$arr['matchNum'] = $infoArr[1];
         //$arr['getName'] = $infoArr[3];
 
