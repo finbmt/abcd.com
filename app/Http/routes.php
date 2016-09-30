@@ -30,8 +30,8 @@ Route::get('dashboard', function () {
 
 // ALL AUTHENTICATION ROUTES - HANDLED IN THE CONTROLLERS
 Route::controllers([
-	'auth' 		=> 'Auth\AuthController',
-	'password' 	=> 'Auth\PasswordController',
+    'auth' 		=> 'Auth\AuthController',
+    'password' 	=> 'Auth\PasswordController',
 ]);
 
 // REGISTRATION EMAIL CONFIRMATION ROUTES
@@ -40,12 +40,12 @@ Route::get('/activate/{code}', 'Auth\AuthController@activateAccount');
 
 // LARAVEL SOCIALITE AUTHENTICATION ROUTES
 Route::get('/social/redirect/{provider}', [
-	'as' 	=> 'social.redirect',
-	'uses' 	=> 'Auth\AuthController@getSocialRedirect'
+    'as' 	=> 'social.redirect',
+    'uses' 	=> 'Auth\AuthController@getSocialRedirect'
 ]);
 Route::get('/social/handle/{provider}', [
-	'as' 	=> 'social.handle',
-	'uses' 	=> 'Auth\AuthController@getSocialHandle'
+    'as' 	=> 'social.handle',
+    'uses' 	=> 'Auth\AuthController@getSocialHandle'
 ]);
 
 // AUTHENTICATION ALIASES/REDIRECTS
@@ -61,23 +61,16 @@ Route::get('register', function () {
 Route::get('reset', function () {
     return redirect('password/email');
 });
-
-Route::get('welcome', [
-    'as' 		=> 'welcome',
-    'uses' 		=> 'WelcomeController@index'
+// ROUTE FOR USER PROFILE IMAGES
+Route::get('images/profile/{id}/backgrounds/{image}', [
+    'uses' 		=> 'ProfilesController@userProfileBackgroundImage'
 ]);
+// USER TASKS ROUTES
+Route::resource('/tasks', 'TasksController');
+Route::resource('/tasks-all', 'TasksController@index_all');
+Route::resource('/tasks-complete', 'TasksController@index_complete');
+Route::resource('/tasks-incomplete', 'TasksController@index_incomplete');
 
-/*Route::get('apilist', [
-    'as' 		=> 'apilist',
-    'uses' 		=> 'FootballController@getlist'
-]);*/
-Route::get('apilist', function (){
-    return ['some' => 'abc'];
-});
-
-Route::group(['prefix' => 'web'], function(){
-    Route::get('index', 'FootballController@index');
-});
 /* API */
 Route::group(['prefix' => 'api/v1'], function(){
     Route::get('list', 'FootballController@getList');
@@ -87,65 +80,64 @@ Route::group(['prefix' => 'api/v1'], function(){
     Route::get('demo', 'FootballController@demo');
 });
 
-
 // USER PAGE ROUTES - RUNNING THROUGH AUTH MIDDLEWARE
 Route::group(['middleware' => 'auth'], function () {
 
-	// HOMEPAGE ROUTE
-	Route::get('/', [
-	    'as' 		=> 'scores',
-	    'uses' 		=> 'FootballController@index'
-	]);
+    // HOMEPAGE ROUTE
+    Route::get('/', [
+        'as' 		=> 'user',
+        'uses' 		=> 'UserController@index'
+    ]);
 
-	// INCEPTIONED MIDDLEWARE TO CHECK TO ALLOW ACCESS TO CURRENT USER ONLY
-	Route::group(['middleware'=> 'currentUser'], function () {
-			Route::resource(
-				'profile',
-				'ProfilesController', [
-					'only' 	=> [
-						'show',
-						'edit',
-						'update'
-					]
-				]
-			);
-	});
-	Route::get('profile/{username}', [
-		'as' 		=> '{username}',
-		'uses' 		=> 'ProfilesController@show'
-	]);
+    // INCEPTIONED MIDDLEWARE TO CHECK TO ALLOW ACCESS TO CURRENT USER ONLY
+    Route::group(['middleware'=> 'currentUser'], function () {
+        Route::resource(
+            'profile',
+            'ProfilesController', [
+                'only' 	=> [
+                    'show',
+                    'edit',
+                    'update'
+                ]
+            ]
+        );
+    });
+    Route::get('profile/{username}', [
+        'as' 		=> '{username}',
+        'uses' 		=> 'ProfilesController@show'
+    ]);
 
-	Route::get('dashboard/profile/{username}', [
-		'as' 		=> '{username}',
-		'uses' 		=> 'ProfilesController@show'
-	]);
+    Route::get('dashboard/profile/{username}', [
+        'as' 		=> '{username}',
+        'uses' 		=> 'ProfilesController@show'
+    ]);
 
 });
 
 // ADMINISTRATOR ACCESS LEVEL PAGE ROUTES - RUNNING THROUGH ADMINISTRATOR MIDDLEWARE
 Route::group(['middleware' => 'administrator'], function () {
 
-	// TEST ROUTE ONLY ROUTE
-	Route::get('administrator', function () {
-	    echo 'Welcome to your ADMINISTRATOR page '. Auth::user()->email .'.';
-	});
+    // TEST ROUTE ONLY ROUTE
+    Route::get('administrator', function () {
+        echo 'Welcome to your ADMINISTRATOR page '. Auth::user()->email .'.';
+    });
 
-	// SHOW ALL USERS PAGE ROUTE
-	Route::resource('users', 'UsersManagementController');
-	Route::get('users', [
-		'as' 			=> '{username}',
-		'uses' 			=> 'UsersManagementController@showUsersMainPanel'
-	]);
+    // SHOW ALL USERS PAGE ROUTE
+    Route::resource('users', 'UsersManagementController');
+    Route::get('users', [
+        'as' 			=> '{username}',
+        'uses' 			=> 'UsersManagementController@showUsersMainPanel'
+    ]);
 
 });
 
 // EDITOR ACCESS LEVEL PAGE ROUTES - RUNNING THROUGH EDITOR MIDDLEWARE
 Route::group(['middleware' => 'editor'], function () {
 
-	//TEST ROUTE ONLY
-	Route::get('editor', function () {
-	    echo 'Welcome to your EDITOR page '. Auth::user()->email .'.';
-	});
+    //TEST ROUTE ONLY
+    Route::get('editor', function () {
+        echo 'Welcome to your EDITOR page '. Auth::user()->email .'.';
+    });
 
 });
 
